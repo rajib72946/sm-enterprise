@@ -1,0 +1,142 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Admin Dashboard</h1>
+        <div>
+            <a href="{{ url_for('add_mobile') }}" class="btn btn-primary">Add Mobile</a>
+            <a href="{{ url_for('add_broadcast') }}" class="btn btn-success">Add Broadcast</a>
+            <a href="{{ url_for('add_community_post') }}" class="btn btn-info">Add Community Post</a>
+        </div>
+    </div>
+
+    <!-- Mobiles Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Mobile Phones</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Brand</th>
+                            <th>Condition</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mobile in mobiles %}
+                        <tr>
+                            <td>{{ mobile.name }}</td>
+                            <td>{{ mobile.brand }}</td>
+                            <td>{{ mobile.condition }}</td>
+                            <td>₹{{ "%.2f"|format(mobile.price) }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_mobile', id=mobile.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('mobile', {{ mobile.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broadcasts Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Broadcasts</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for broadcast in broadcasts %}
+                        <tr>
+                            <td>{{ broadcast.title }}</td>
+                            <td>{{ broadcast.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_broadcast', id=broadcast.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('broadcast', {{ broadcast.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Posts Section -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Community Posts</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in community_posts %}
+                        <tr>
+                            <td>{{ post.title }}</td>
+                            <td>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_community_post', id=post.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('community', {{ post.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this item? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" class="btn btn-danger" id="confirmDeleteBtn">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(type, id) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const deleteBtn = document.getElementById('confirmDeleteBtn');
+    deleteBtn.href = `{{ url_for('admin_dashboard') }}`.replace('/dashboard', `/${type}/delete/${id}`);
+    modal.show();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Add New Mobile</h1>
+    <form method="post" enctype="multipart/form-data">
+        <div class="row">
+            <!-- Basic Information -->
+            <div class="col-md-6">
+                <h3>Basic Information</h3>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Mobile Name *</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="brand" class="form-label">Brand *</label>
+                    <select class="form-select" id="brand" name="brand" required>
+                        <option value="">Select Brand</option>
+                        {% for brand in brands %}
+                        <option value="{{ brand }}">{{ brand }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="condition" class="form-label">Condition *</label>
+                    <select class="form-select" id="condition" name="condition" required>
+                        <option value="">Select Condition</option>
+                        {% for condition in conditions %}
+                        <option value="{{ condition }}">{{ condition }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="model_year" class="form-label">Model Year *</label>
+                    <input type="number" class="form-control" id="model_year" name="model_year" 
+                           min="2015" max="2025" required>
+                </div>
+                <div class="mb-3">
+                    <label for="original_price" class="form-label">Original Price (₹) *</label>
+                    <input type="number" class="form-control" id="original_price" name="original_price" 
+                           min="0" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Selling Price (₹) *</label>
+                    <input type="number" class="form-control" id="price" name="price" 
+                           min="0" step="0.01" required>
+                </div>
+            </div>
+
+            <!-- Specifications -->
+            <div class="col-md-6">
+                <h3>Specifications</h3>
+                <div class="mb-3">
+                    <label for="ram" class="form-label">RAM *</label>
+                    <select class="form-select" id="ram" name="ram" required>
+                        <option value="">Select RAM</option>
+                        {% for ram in ram_options %}
+                        <option value="{{ ram }}">{{ ram }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="rom" class="form-label">Storage *</label>
+                    <select class="form-select" id="rom" name="rom" required>
+                        <option value="">Select Storage</option>
+                        {% for rom in rom_options %}
+                        <option value="{{ rom }}">{{ rom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="network" class="form-label">Network *</label>
+                    <select class="form-select" id="network" name="network" required>
+                        <option value="">Select Network</option>
+                        {% for network in network_options %}
+                        <option value="{{ network }}">{{ network }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="processor_brand" class="form-label">Processor Brand *</label>
+                    <select class="form-select" id="processor_brand" name="processor_brand" required>
+                        <option value="">Select Processor Brand</option>
+                        {% for brand in processor_brands %}
+                        <option value="{{ brand }}">{{ brand }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="processor_model" class="form-label">Processor Model *</label>
+                    <select class="form-select" id="processor_model" name="processor_model" required>
+                        <option value="">Select Processor Model</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="display_type" class="form-label">Display Type *</label>
+                    <select class="form-select" id="display_type" name="display_type" required>
+                        <option value="">Select Display Type</option>
+                        {% for display in display_types %}
+                        <option value="{{ display }}">{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="battery" class="form-label">Battery *</label>
+                    <select class="form-select" id="battery" name="battery" required>
+                        <option value="">Select Battery Size</option>
+                        {% for battery in battery_sizes %}
+                        <option value="{{ battery }}">{{ battery }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="charging" class="form-label">Charging Speed *</label>
+                    <select class="form-select" id="charging" name="charging" required>
+                        <option value="">Select Charging Speed</option>
+                        {% for charging in charging_speeds %}
+                        <option value="{{ charging }}">{{ charging }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="additional_specs" class="form-label">Additional Specifications</label>
+                    <textarea class="form-control" id="additional_specs" name="additional_specs" rows="3"
+                              placeholder="Enter any additional specifications (one per line)"></textarea>
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div class="col-12 mt-4">
+                <h3>Images</h3>
+                <div class="mb-3">
+                    <label for="images" class="form-label">Upload Images *</label>
+                    <input type="file" class="form-control" id="images" name="images" 
+                           accept="image/*" multiple required>
+                    <div class="form-text">You can select multiple images. First image will be the main image.</div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary">Add Mobile</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const processorBrandSelect = document.getElementById('processor_brand');
+    const processorModelSelect = document.getElementById('processor_model');
+    const processorSeries = {{ processor_series|tojson }};
+    
+    function updateProcessorModels() {
+        const brand = processorBrandSelect.value;
+        processorModelSelect.innerHTML = '<option value="">Select Processor Model</option>';
+        
+        if (brand && processorSeries[brand]) {
+            processorSeries[brand].forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                processorModelSelect.appendChild(option);
+            });
+        }
+    }
+    
+    processorBrandSelect.addEventListener('change', updateProcessorModels);
+    
+    // Price validation
+    const originalPriceInput = document.getElementById('original_price');
+    const sellingPriceInput = document.getElementById('price');
+    
+    function validatePrices() {
+        const originalPrice = parseFloat(originalPriceInput.value);
+        const sellingPrice = parseFloat(sellingPriceInput.value);
+        
+        if (sellingPrice > originalPrice) {
+            sellingPriceInput.setCustomValidity('Selling price cannot be higher than original price');
+        } else {
+            sellingPriceInput.setCustomValidity('');
+        }
+    }
+    
+    originalPriceInput.addEventListener('input', validatePrices);
+    sellingPriceInput.addEventListener('input', validatePrices);
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}

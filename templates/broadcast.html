@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Latest Broadcasts</h2>
+    </div>
+
+    {% for broadcast in broadcasts %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            {% if broadcast.image %}
+            <img src="{{ url_for('static', filename='uploads/' + broadcast.image) }}" class="card-img-top broadcast-img" alt="{{ broadcast.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ broadcast.title }}</h5>
+                <p class="card-text">{{ broadcast.content }}</p>
+                <small class="text-muted">Posted on {{ broadcast.created_at.strftime('%B %d, %Y') }}</small>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            No broadcasts available at the moment.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

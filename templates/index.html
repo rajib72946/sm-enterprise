@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if banners %}
+<div id="carouselBanners" class="carousel slide mb-4" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        {% for banner in banners %}
+        <button type="button" data-bs-target="#carouselBanners" data-bs-slide-to="{{ loop.index0 }}" 
+                {% if loop.first %}class="active"{% endif %}></button>
+        {% endfor %}
+    </div>
+    <div class="carousel-inner">
+        {% for banner in banners %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename='uploads/' + banner.image) }}" class="d-block w-100" alt="Banner">
+        </div>
+        {% endfor %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselBanners" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+{% endif %}
+
+<!-- Today's Uploads -->
+{% if todays_mobiles %}
+<div class="mb-4">
+    <h3 class="mb-3">📱 Today's Uploads</h3>
+    <div class="mobile-scroll">
+        {% for mobile in todays_mobiles %}
+        <div class="mobile-card">
+            {% set images = mobile.images.split(',') %}
+            {% if images %}
+            <img src="{{ url_for('static', filename='uploads/' + images[0]) }}" class="card-img-top" alt="{{ mobile.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title text-truncate">{{ mobile.name }}</h5>
+                <p class="card-text mb-1">
+                    <span class="badge bg-primary">{{ mobile.brand }}</span>
+                    <span class="badge bg-secondary">{{ mobile.condition }}</span>
+                </p>
+                <p class="card-text mb-2">
+                    <span class="text-decoration-line-through text-muted">₹{{ "%.2f"|format(mobile.original_price) }}</span>
+                    <span class="ms-2 fw-bold text-success">₹{{ "%.2f"|format(mobile.price) }}</span>
+                    <span class="ms-2 badge bg-danger">
+                        {{ ((mobile.original_price - mobile.price) / mobile.original_price * 100)|round|int }}% OFF
+                    </span>
+                </p>
+                <a href="{{ url_for('mobile_detail', id=mobile.id) }}" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Filter Section -->
+<div class="filter-section mb-4">
+    <div class="card">
+        <div class="card-body">
+            <form method="get" action="{{ url_for('search') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Brand</label>
+                    <select class="form-select" name="brand">
+                        <option value="">All Brands</option>
+                        {% for brand in ['Samsung', 'Xiaomi', 'Realme', 'Oppo', 'Vivo', 'OnePlus', 'Poco', 'Micromax', 'Lava', 'Karbonn', 'iQOO', 'Nothing'] %}
+                        <option value="{{ brand }}">{{ brand }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Condition</label>
+                    <select class="form-select" name="condition">
+                        <option value="">All Conditions</option>
+                        {% for condition in ['Seal Packed', 'Open Box', 'Super Mint', 'Mint', 'Very Good', 'Good'] %}
+                        <option value="{{ condition }}">{{ condition }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Price Range</label>
+                    <select class="form-select" name="price_range">
+                        <option value="">Any Price</option>
+                        <option value="0-5000">Under ₹5,000</option>
+                        <option value="5000-10000">₹5,000 - ₹10,000</option>
+                        <option value="10000-15000">₹10,000 - ₹15,000</option>
+                        <option value="15000-20000">₹15,000 - ₹20,000</option>
+                        <option value="20000-30000">₹20,000 - ₹30,000</option>
+                        <option value="30000-50000">₹30,000 - ₹50,000</option>
+                        <option value="50000+">Above ₹50,000</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- All Mobiles -->
+<h3 class="mb-3">📱 Available Mobiles</h3>
+<div class="mobile-scroll">
+    {% for mobile in mobiles %}
+    <div class="mobile-card">
+        {% set images = mobile.images.split(',') %}
+        {% if images %}
+        <img src="{{ url_for('static', filename='uploads/' + images[0]) }}" class="card-img-top" alt="{{ mobile.name }}">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title text-truncate">{{ mobile.name }}</h5>
+            <p class="card-text mb-1">
+                <span class="badge bg-primary">{{ mobile.brand }}</span>
+                <span class="badge bg-secondary">{{ mobile.condition }}</span>
+            </p>
+            <p class="card-text mb-2">
+                <span class="text-decoration-line-through text-muted">₹{{ "%.2f"|format(mobile.original_price) }}</span>
+                <span class="ms-2 fw-bold text-success">₹{{ "%.2f"|format(mobile.price) }}</span>
+                <span class="ms-2 badge bg-danger">
+                    {{ ((mobile.original_price - mobile.price) / mobile.original_price * 100)|round|int }}% OFF
+                </span>
+            </p>
+            <a href="{{ url_for('mobile_detail', id=mobile.id) }}" class="btn btn-primary btn-sm">View Details</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#212529">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>S.M. Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .search-container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .filter-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .filter-button:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+        .filter-sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            z-index: 1050;
+            transition: right 0.3s ease;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        .filter-sidebar.show {
+            right: 0;
+        }
+        .filter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            display: none;
+        }
+        .filter-overlay.show {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .filter-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            {% if shop_logo %}
+            <a class="navbar-brand me-0" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='uploads/' + shop_logo) }}" 
+                     alt="Logo" height="40" class="d-inline-block align-text-top">
+            </a>
+            {% endif %}
+            <a class="navbar-brand mx-auto" href="{{ url_for('home') }}">{{ shop_name }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}">
+                            <i class="bi bi-info-circle"></i> About Us
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contact') }}">
+                            <i class="bi bi-envelope"></i> Contact
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('broadcast_list') }}">
+                            <i class="bi bi-broadcast"></i> Broadcasts
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('community') }}">
+                            <i class="bi bi-people"></i> Community
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Admin Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_login') }}">
+                            <i class="bi bi-person"></i> Admin Login
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <form action="{{ url_for('search') }}" method="get" class="d-flex">
+            <input type="text" name="query" class="form-control me-2" 
+                   value="{{ request.args.get('query', '') }}"
+                   placeholder="Search mobiles by name, brand, specs...">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Filter Button -->
+    {% if request.endpoint == 'search' %}
+    <button class="btn filter-button" onclick="toggleFilter()">
+        <i class="bi bi-funnel"></i>
+    </button>
+
+    <!-- Filter Overlay -->
+    <div class="filter-overlay" onclick="toggleFilter()"></div>
+
+    <!-- Filter Sidebar -->
+    <div class="filter-sidebar">
+        <div class="p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Filters</h5>
+                <button class="btn btn-link" onclick="toggleFilter()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div id="filterContent">
+                <!-- Filter content will be moved here by JavaScript -->
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% if request.endpoint == 'search' %}
+    <script>
+    function toggleFilter() {
+        document.querySelector('.filter-sidebar').classList.toggle('show');
+        document.querySelector('.filter-overlay').classList.toggle('show');
+    }
+
+    // Move filter content to sidebar on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterContent = document.querySelector('#filterCollapse');
+        const filterSidebar = document.querySelector('#filterContent');
+        if (filterContent && filterSidebar) {
+            filterSidebar.appendChild(filterContent);
+            filterContent.classList.add('show');
+        }
+    });
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Add New Banner</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Banner Image</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                        <small class="text-muted">Recommended size: 1200x400 pixels</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Banner</button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

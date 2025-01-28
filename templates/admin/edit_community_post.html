@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Edit Community Post</h2>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ post.title }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required>{{ post.content }}</textarea>
+                    </div>
+
+                    {% if post.image %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Image</label>
+                        <div class="mb-2">
+                            <img src="{{ url_for('static', filename='uploads/' + post.image) }}" 
+                                 class="img-fluid rounded" style="max-height: 200px;" alt="Current image">
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="image" class="form-label">New Image (Optional)</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <small class="text-muted">Leave empty to keep the current image</small>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="pinned" name="pinned" 
+                               {% if post.pinned %}checked{% endif %}>
+                        <label class="form-check-label" for="pinned">Pin this post</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Update Post</button>
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

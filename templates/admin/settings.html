@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Shop Settings</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="shop_name" class="form-label">Shop Name</label>
+                            <input type="text" class="form-control" id="shop_name" name="shop_name" 
+                                   value="{{ settings.get('shop_name', '') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="shop_logo" class="form-label">Shop Logo</label>
+                            {% if settings.get('shop_logo') %}
+                            <div class="mb-2">
+                                <img src="{{ url_for('static', filename='uploads/' + settings.get('shop_logo')) }}" 
+                                     alt="Current Logo" style="max-height: 50px;">
+                            </div>
+                            {% endif %}
+                            <input type="file" class="form-control" id="shop_logo" name="shop_logo" 
+                                   accept="image/png,image/jpeg,image/jpg">
+                            <small class="text-muted">Leave empty to keep current logo</small>
+                        </div>
+
+                        <hr class="my-4">
+                        <h3 class="mb-3">Contact Information</h3>
+
+                        <div class="mb-3">
+                            <label for="contact_phone" class="form-label">Call Us Number</label>
+                            <div class="input-group">
+                                <input type="tel" class="form-control" id="contact_phone" name="contact_phone" 
+                                       value="{{ settings.get('contact_phone', '') }}" required>
+                                <a href="tel:{{ settings.get('contact_phone', '') }}" class="btn btn-outline-primary">
+                                    <i class="bi bi-telephone"></i> Test Call
+                                </a>
+                            </div>
+                            <small class="text-muted">Format: +91XXXXXXXXXX</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="contact_whatsapp" class="form-label">WhatsApp Number</label>
+                            <div class="input-group">
+                                <input type="tel" class="form-control" id="contact_whatsapp" name="contact_whatsapp" 
+                                       value="{{ settings.get('contact_whatsapp', '') }}" required>
+                                <a href="https://wa.me/{{ settings.get('contact_whatsapp', '') }}" 
+                                   class="btn btn-outline-success" target="_blank">
+                                    <i class="bi bi-whatsapp"></i> Test WhatsApp
+                                </a>
+                            </div>
+                            <small class="text-muted">Format: 91XXXXXXXXXX (without +)</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

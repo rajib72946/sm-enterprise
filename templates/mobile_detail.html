@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mobile-detail">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <!-- Main Carousel -->
+            <div id="mobileImages" class="carousel slide" data-bs-ride="false" data-bs-touch="false">
+                <div class="carousel-inner">
+                    {% set image_list = mobile.images.split(',') %}
+                    {% for image in image_list %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <img src="{{ url_for('static', filename='uploads/' + image) }}" 
+                             class="d-block w-100" alt="{{ mobile.name }}"
+                             onclick="openLightbox({{ loop.index0 }})">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if image_list|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#mobileImages" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#mobileImages" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Thumbnails -->
+            {% if image_list|length > 1 %}
+            <div class="thumbnails">
+                {% for image in image_list %}
+                <div class="thumbnail {% if loop.first %}active{% endif %}" 
+                     onclick="showImage({{ loop.index0 }})">
+                    <img src="{{ url_for('static', filename='uploads/' + image) }}" 
+                         alt="{{ mobile.name }} thumbnail">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Lightbox -->
+            <div class="lightbox" id="imageLightbox">
+                <button class="close-lightbox" onclick="closeLightbox()">&times;</button>
+                <button class="prev-image" onclick="changeImage(-1)">&lt;</button>
+                <img src="" alt="{{ mobile.name }}" id="lightboxImage">
+                <button class="next-image" onclick="changeImage(1)">&gt;</button>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h1 class="mb-3">{{ mobile.name }}</h1>
+            <div class="mb-3">
+                <span class="badge bg-primary">{{ mobile.brand }}</span>
+                <span class="badge bg-secondary">{{ mobile.condition }}</span>
+                {% if mobile.model_year %}
+                <span class="badge bg-info">{{ mobile.model_year }}</span>
+                {% endif %}
+            </div>
+            <div class="price-section mb-4">
+                <div class="original-price text-muted text-decoration-line-through">
+                    ₹{{ "%.2f"|format(mobile.original_price) }}
+                </div>
+                <div class="current-price fs-2 fw-bold text-success">
+                    ₹{{ "%.2f"|format(mobile.price) }}
+                </div>
+                <div class="discount badge bg-danger">
+                    {{ ((mobile.original_price - mobile.price) / mobile.original_price * 100)|round|int }}% OFF
+                </div>
+            </div>
+            <div class="specs-section mb-4">
+                <h3>Specifications</h3>
+                <div class="specs-content">
+                    <ul class="list-unstyled">
+                        {% for spec in mobile.specs.split('\n') %}
+                        <li class="mb-2">{{ spec }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="contact-section">
+                <a href="tel:{{ contact_phone }}" class="btn btn-success btn-lg mb-2 w-100">
+                    <i class="bi bi-telephone-fill"></i> Call Now
+                </a>
+                <a href="https://wa.me/{{ contact_whatsapp }}" class="btn btn-success btn-lg w-100">
+                    <i class="bi bi-whatsapp"></i> WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if related_mobiles %}
+    <div class="related-mobiles-section">
+        <h3 class="mb-3">Similar Mobiles</h3>
+        <div class="row g-4">
+            {% for mobile in related_mobiles %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card h-100">
+                    {% set images = mobile.images.split(',') %}
+                    {% if images %}
+                    <img src="{{ url_for('static', filename='uploads/' + images[0]) }}" 
+                         class="card-img-top" alt="{{ mobile.name }}"
+                         style="height: 200px; object-fit: contain; background: #f8f9fa;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ mobile.name }}</h5>
+                        <div class="mb-2">
+                            <span class="badge bg-primary">{{ mobile.brand }}</span>
+                            <span class="badge bg-secondary">{{ mobile.condition }}</span>
+                        </div>
+                        <div class="price-section mb-2">
+                            <small class="text-decoration-line-through text-muted">₹{{ "%.2f"|format(mobile.original_price) }}</small>
+                            <div class="fw-bold text-success">₹{{ "%.2f"|format(mobile.price) }}</div>
+                            <small class="badge bg-danger">
+                                {{ ((mobile.original_price - mobile.price) / mobile.original_price * 100)|round|int }}% OFF
+                            </small>
+                        </div>
+                        <a href="{{ url_for('mobile_detail', id=mobile.id) }}" class="btn btn-primary btn-sm w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const images = {{ mobile.images.split(',')|tojson }};
+    const baseUrl = "{{ url_for('static', filename='uploads/') }}";
+    let currentImageIndex = 0;
+    
+    const carousel = new bootstrap.Carousel(document.getElementById('mobileImages'), {
+        interval: false,
+        wrap: true
+    });
+
+    window.showImage = function(index) {
+        carousel.to(index);
+        updateThumbnails(index);
+        currentImageIndex = index;
+    }
+
+    window.updateThumbnails = function(activeIndex) {
+        document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+            if (index === activeIndex) {
+                thumb.classList.add('active');
+            } else {
+                thumb.classList.remove('active');
+            }
+        });
+    }
+
+    window.openLightbox = function(index) {
+        currentImageIndex = index;
+        const lightbox = document.getElementById('imageLightbox');
+        const lightboxImg = document.getElementById('lightboxImage');
+        lightboxImg.src = baseUrl + images[index];
+        lightbox.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    window.closeLightbox = function() {
+        const lightbox = document.getElementById('imageLightbox');
+        lightbox.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    window.changeImage = function(direction) {
+        currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
+        const lightboxImg = document.getElementById('lightboxImage');
+        lightboxImg.src = baseUrl + images[currentImageIndex];
+        carousel.to(currentImageIndex);
+        updateThumbnails(currentImageIndex);
+    }
+
+    // Update thumbnails when carousel slides
+    document.getElementById('mobileImages').addEventListener('slide.bs.carousel', function (event) {
+        currentImageIndex = event.to;
+        updateThumbnails(event.to);
+    });
+
+    // Close lightbox when clicking outside the image
+    document.getElementById('imageLightbox').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeLightbox();
+        }
+    });
+
+    // Keyboard navigation for lightbox
+    document.addEventListener('keydown', function(event) {
+        if (!document.getElementById('imageLightbox').classList.contains('show')) return;
+        
+        switch(event.key) {
+            case 'Escape':
+                closeLightbox();
+                break;
+            case 'ArrowLeft':
+                changeImage(-1);
+                break;
+            case 'ArrowRight':
+                changeImage(1);
+                break;
+        }
+    });
+});
+</script>
+{% endblock %}

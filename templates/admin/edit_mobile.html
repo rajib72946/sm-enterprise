@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Edit Mobile</h2>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ mobile.name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="brand" class="form-label">Brand</label>
+                            <select class="form-select" id="brand" name="brand" required>
+                                {% for brand in ['Samsung', 'Xiaomi', 'Realme', 'Oppo', 'Vivo', 'OnePlus', 'Poco', 'Micromax', 'Lava', 'Karbonn', 'iQOO', 'Nothing'] %}
+                                <option value="{{ brand }}" {% if mobile.brand == brand %}selected{% endif %}>{{ brand }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="condition" class="form-label">Condition</label>
+                            <select class="form-select" id="condition" name="condition" required>
+                                {% for condition in ['Seal Packed', 'Open Box', 'Super Mint', 'Mint', 'Very Good', 'Good'] %}
+                                <option value="{{ condition }}" {% if mobile.condition == condition %}selected{% endif %}>{{ condition }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="model_year" class="form-label">Model Year</label>
+                            <input type="number" class="form-control" id="model_year" name="model_year" 
+                                   value="{{ mobile.model_year }}" min="2015" max="2025">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="original_price" class="form-label">Original Price (₹)</label>
+                            <input type="number" class="form-control" id="original_price" name="original_price" 
+                                   value="{{ mobile.original_price }}" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="price" class="form-label">Selling Price (₹)</label>
+                            <input type="number" class="form-control" id="price" name="price" 
+                                   value="{{ mobile.price }}" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="specs" class="form-label">Specifications</label>
+                        <textarea class="form-control" id="specs" name="specs" rows="5">{{ mobile.specs }}</textarea>
+                    </div>
+
+                    {% if mobile.images %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Images</label>
+                        <div class="row">
+                            {% for image in mobile.images.split(',') %}
+                            <div class="col-md-3 mb-2">
+                                <img src="{{ url_for('static', filename='uploads/' + image) }}" 
+                                     class="img-fluid rounded" alt="Mobile image">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="images" class="form-label">New Images</label>
+                        <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                        <small class="text-muted">Select multiple images if needed. Leave empty to keep current images.</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Update Mobile</button>
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('original_price').addEventListener('change', function() {
+    const originalPrice = parseFloat(this.value) || 0;
+    const sellingPrice = document.getElementById('price');
+    if (parseFloat(sellingPrice.value) > originalPrice) {
+        sellingPrice.value = originalPrice;
+    }
+    sellingPrice.max = originalPrice;
+});
+</script>
+{% endblock %}

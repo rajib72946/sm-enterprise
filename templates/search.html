@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Filter Section -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Filters</h5>
+                    <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#filterCollapse">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                </div>
+                <div class="card-body collapse d-md-block" id="filterCollapse">
+                    <form method="get" action="{{ url_for('search') }}" id="filterForm">
+                        <div class="mb-3">
+                            <label class="form-label">Search</label>
+                            <input type="text" class="form-control" id="query" name="query" value="{{ request.args.get('query', '') }}" placeholder="Search mobiles...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Brand</label>
+                            <input type="text" class="form-control" id="brand" name="brand" value="{{ request.args.get('brand', '') }}" placeholder="Enter brand...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Condition</label>
+                            <select class="form-select" id="condition" name="condition">
+                                <option value="">All Conditions</option>
+                                {% for condition in conditions %}
+                                <option value="{{ condition }}" {% if request.args.get('condition') == condition %}selected{% endif %}>
+                                    {{ condition }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priceRange" class="form-label">Price Range</label>
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="number" class="form-control" name="min_price" 
+                                       placeholder="Min" value="{{ request.args.get('min_price', '') }}">
+                                <span class="input-group-text">to</span>
+                                <input type="number" class="form-control" name="max_price" 
+                                       placeholder="Max" value="{{ request.args.get('max_price', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+                            <a href="{{ url_for('search') }}" class="btn btn-outline-secondary btn-sm">Clear All</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile List -->
+        <div class="col-md-9">
+            <div class="row g-4">
+                {% for mobile in mobiles %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        {% set images = mobile.images.split(',') %}
+                        {% if images %}
+                        <img src="{{ url_for('static', filename='uploads/' + images[0]) }}" class="card-img-top" alt="{{ mobile.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ mobile.name }}</h5>
+                            <p class="card-text">
+                                <span class="badge bg-primary">{{ mobile.condition }}</span>
+                                <span class="badge bg-success">₹{{ "%.2f"|format(mobile.price) }}</span>
+                            </p>
+                            <a href="{{ url_for('mobile_detail', id=mobile.id) }}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No mobiles found matching your criteria.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when checkboxes change
+    document.querySelectorAll('.filter-checkbox').forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    });
+});
+</script>
+{% endblock %}
