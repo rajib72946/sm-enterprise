@@ -259,14 +259,14 @@ def admin_login():
 @login_required
 def admin_dashboard():
     mobiles = Mobile.query.order_by(Mobile.created_at.desc()).all()
+    broadcasts = Broadcast.query.order_by(Broadcast.created_at.desc()).all()
+    community_posts = CommunityPost.query.order_by(CommunityPost.created_at.desc()).all()
     banners = Banner.query.all()
-    broadcasts = Broadcast.query.all()
-    community_posts = CommunityPost.query.all()
     return render_template('admin/dashboard.html', 
-                         mobiles=mobiles, 
-                         banners=banners, 
+                         mobiles=mobiles,
                          broadcasts=broadcasts, 
-                         community_posts=community_posts)
+                         community_posts=community_posts,
+                         banners=banners)
 
 @app.route('/admin/mobile/add', methods=['GET', 'POST'])
 @login_required
@@ -370,6 +370,21 @@ def add_banner():
                 flash('Banner added successfully!')
         return redirect(url_for('admin_dashboard'))
     return render_template('admin/add_banner.html')
+
+@app.route('/admin/banner/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_banner(id):
+    banner = Banner.query.get_or_404(id)
+    try:
+        if banner.image and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], banner.image)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], banner.image))
+        db.session.delete(banner)
+        db.session.commit()
+        flash('Banner deleted successfully!')
+    except Exception as e:
+        db.session.rollback()
+        flash('Error deleting banner: ' + str(e), 'error')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/broadcast/add', methods=['GET', 'POST'])
 @login_required
@@ -494,67 +509,56 @@ def edit_community_post(id):
     
     return render_template('admin/edit_community_post.html', post=post)
 
-@app.route('/admin/mobile/delete/<int:id>')
+@app.route('/admin/mobile/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_mobile(id):
     mobile = Mobile.query.get_or_404(id)
     try:
         # Delete associated images
         if mobile.images:
-            for image in mobile.images.split(','):
-                image_path = os.path.join(app.config['UPLOAD_FOLDER'], image)
+            image_list = mobile.images.split(',')
+            for image in image_list:
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.strip())
                 if os.path.exists(image_path):
                     os.remove(image_path)
         
         db.session.delete(mobile)
         db.session.commit()
-        flash('Mobile deleted successfully!', 'success')
+        flash('Mobile listing deleted successfully!')
     except Exception as e:
         db.session.rollback()
-        flash('Error deleting mobile. Please try again.', 'error')
-    
+        flash('Error deleting mobile: ' + str(e), 'error')
     return redirect(url_for('admin_dashboard'))
 
-@app.route('/admin/broadcast/delete/<int:id>')
+@app.route('/admin/broadcast/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_broadcast(id):
     broadcast = Broadcast.query.get_or_404(id)
     try:
-        # Delete associated image if exists
-        if broadcast.image:
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], broadcast.image)
-            if os.path.exists(image_path):
-                os.remove(image_path)
-        
+        if broadcast.image and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], broadcast.image)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], broadcast.image))
         db.session.delete(broadcast)
         db.session.commit()
-        flash('Broadcast deleted successfully!', 'success')
+        flash('Broadcast deleted successfully!')
     except Exception as e:
         db.session.rollback()
-        flash('Error deleting broadcast. Please try again.', 'error')
-    
-    return redirect(url_for('broadcast_list'))
+        flash('Error deleting broadcast: ' + str(e), 'error')
+    return redirect(url_for('admin_dashboard'))
 
-@app.route('/admin/community/delete/<int:id>')
+@app.route('/admin/community/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_community(id):
     post = CommunityPost.query.get_or_404(id)
     try:
-        # Delete associated images
-        if post.images:
-            for image in post.images.split(','):
-                image_path = os.path.join(app.config['UPLOAD_FOLDER'], image)
-                if os.path.exists(image_path):
-                    os.remove(image_path)
-        
+        if post.image and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], post.image)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], post.image))
         db.session.delete(post)
         db.session.commit()
-        flash('Community post deleted successfully!', 'success')
+        flash('Community post deleted successfully!')
     except Exception as e:
         db.session.rollback()
-        flash('Error deleting community post. Please try again.', 'error')
-    
-    return redirect(url_for('community'))
+        flash('Error deleting community post: ' + str(e), 'error')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/settings', methods=['GET', 'POST'])
 @login_required

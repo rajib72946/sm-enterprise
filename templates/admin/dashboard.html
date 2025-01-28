@@ -8,6 +8,39 @@
             <a href="{{ url_for('add_mobile') }}" class="btn btn-primary">Add Mobile</a>
             <a href="{{ url_for('add_broadcast') }}" class="btn btn-success">Add Broadcast</a>
             <a href="{{ url_for('add_community_post') }}" class="btn btn-info">Add Community Post</a>
+            <a href="{{ url_for('add_banner') }}" class="btn btn-warning">Add Banner</a>
+        </div>
+    </div>
+
+    <!-- Banners Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Banners</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for banner in banners %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('static', filename='uploads/' + banner.image) }}" 
+                                     alt="Banner" style="max-height: 100px;">
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('banner', {{ banner.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -125,7 +158,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="#" class="btn btn-danger" id="confirmDeleteBtn">Delete</a>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
             </div>
         </div>
     </div>
@@ -134,8 +169,8 @@
 <script>
 function confirmDelete(type, id) {
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    const deleteBtn = document.getElementById('confirmDeleteBtn');
-    deleteBtn.href = `{{ url_for('admin_dashboard') }}`.replace('/dashboard', `/${type}/delete/${id}`);
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = `{{ url_for('admin_dashboard') }}`.replace('/dashboard', `/${type}/delete/${id}`);
     modal.show();
 }
 </script>
